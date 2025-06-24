@@ -1,0 +1,23 @@
+<%- include('partials/header') %>
+<h2>Your Expenses</h2>
+<form method="POST" action="/expenses/add">
+  <input type="date" name="date" required>
+  <input name="category" placeholder="Category" required>
+  <input name="amount" type="number" placeholder="Amount" required>
+  <input name="description" placeholder="Description">
+  <button type="submit">Add Expense</button>
+</form>
+<table>
+  <tr>
+    <th>Date</th><th>Category</th><th>Amount</th><th>Description</th>
+  </tr>
+  <% expenses.forEach(exp => { %>
+    <tr>
+      <td><%= exp.date.toISOString().slice(0,10) %></td>
+      <td><%= exp.category %></td>
+      <td><%= exp.amount %></td>
+      <td><%= exp.description %></td>
+    </tr>
+  <% }) %>
+</table>
+<%- include('partials/footer') %>

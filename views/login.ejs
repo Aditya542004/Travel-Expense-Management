@@ -1,0 +1,23 @@
+<%- include('partials/header') %>
+<h2>Login</h2>
+<form method="POST" action="/login" style="max-width:400px;margin:auto;">
+  <div style="margin-bottom:1em;">
+    <label for="username">Username</label><br>
+    <input id="username" name="username" placeholder="Username" required autofocus>
+  </div>
+  <div style="margin-bottom:1em;">
+    <label for="password">Password</label><br>
+    <input id="password" name="password" type="password" placeholder="Password" required>
+  </div>
+  <button type="submit">Login</button>
+</form>
+
+<% if (typeof error !== 'undefined' && error) { %>
+  <p style="color:red;text-align:center;"><%= error %></p>
+<% } %>
+
+<p style="text-align:center;">
+  Don't have an account?
+  <a href="/register">Register here</a>
+</p>
+<%- include('partials/footer') %>
