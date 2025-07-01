@@ -1,27 +1,79 @@
 <%- include('partials/header') %>
-<h2>Register</h2>
-<form method="POST" action="/register" style="max-width:400px;margin:auto;">
-  <div style="margin-bottom:1em;">
+<h2 style="text-align:center;">Register</h2>
+<form method="POST" action="/register" class="register-form">
+  <div class="form-group">
     <label for="username">Username</label><br>
     <input id="username" name="username" placeholder="Enter a unique username" required autofocus>
   </div>
-  <div style="margin-bottom:1em;">
+  <div class="form-group">
     <label for="password">Password</label><br>
     <input id="password" name="password" type="password" placeholder="Create a password" required>
   </div>
-  <div style="margin-bottom:1em;">
+  <div class="form-group">
     <label for="confirm_password">Confirm Password</label><br>
     <input id="confirm_password" name="confirm_password" type="password" placeholder="Re-enter your password" required>
   </div>
-  <button type="submit">Register</button>
+  <button type="submit" class="btn-primary">Register</button>
 </form>
 
+<div class="social-login">
+  <button type="button" class="btn-google" onclick="googleLogin()">
+    <img src="/images/google-icon.png" alt="Google" class="icon"/> Register with Google
+  </button>
+  <button type="button" class="btn-facebook" onclick="facebookLogin()">
+    <img src="/images/facebook-icon.png" alt="Facebook" class="icon"/> Register with Facebook
+  </button>
+</div>
+
 <% if (typeof error !== 'undefined' && error) { %>
-  <p style="color:red;text-align:center;"><%= error %></p>
+  <p class="error-message"><%= error %></p>
 <% } %>
 
-<p style="text-align:center;">
+<p class="login-link">
   Already have an account?
   <a href="/login">Login here</a>
 </p>
 <%- include('partials/footer') %>
+
+<!-- Firebase JS SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+<script>
+  // Replace with your Firebase config
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    // ...other config...
+  };
+  firebase.initializeApp(firebaseConfig);
+
+  function googleLogin() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    firebase.auth().signInWithPopup(provider)
+      .then(result => result.user.getIdToken())
+      .then(idToken => fetch('/auth/firebase-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken })
+      }))
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) window.location.href = '/dashboard';
+      });
+  }
+
+  function facebookLogin() {
+    const provider = new firebase.auth.FacebookAuthProvider();
+    firebase.auth().signInWithPopup(provider)
+      .then(result => result.user.getIdToken())
+      .then(idToken => fetch('/auth/firebase-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken })
+      }))
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) window.location.href = '/dashboard';
+      });
+  }
+</script>

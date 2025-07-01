@@ -5,6 +5,13 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const path = require('path');
 
+// Add Firebase Admin SDK
+const admin = require('firebase-admin');
+const serviceAccount = require('./firebase-service-account.json'); // Place your Firebase service account key here
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 const app = express();
 
@@ -19,6 +26,7 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: false }));
+app.use(express.json()); // Needed for Firebase login POST
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
@@ -40,6 +48,19 @@ app.get('/', (req, res) => {
     return res.redirect('/dashboard');
   }
   res.redirect('/login');
+});
+
+// Firebase login route
+app.post('/auth/firebase-login', async (req, res) => {
+  const idToken = req.body.idToken;
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    req.session.userId = decodedToken.uid;
+    // Optionally save user info to DB here
+    res.json({ success: true });
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
 });
 
 // Auth routes
