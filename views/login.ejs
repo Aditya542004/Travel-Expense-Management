@@ -14,10 +14,10 @@
 
 <div class="social-login">
   <button type="button" class="btn-google" onclick="googleLogin()">
-    <img src="/images/google-icon.png" alt="Google" class="icon"/> Login with Google
+    <img src="/image/google-icon.png" alt="Google" class="icon"/> 
   </button>
   <button type="button" class="btn-facebook" onclick="facebookLogin()">
-    <img src="/images/facebook-icon.png" alt="Facebook" class="icon"/> Login with Facebook
+    <img src="/image/facebook-icon.png" alt="Facebook" class="icon"/> 
   </button>
 </div>
 
@@ -45,7 +45,9 @@
     appId: "1:118572373444:web:4672b5747be0041e0ec091",
     measurementId: "G-RXEMTWDT9W"
   };
-  firebase.initializeApp(firebaseConfig);
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
 
   function googleLogin() {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -54,11 +56,22 @@
       .then(idToken => fetch('/auth/firebase-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken })
+        body: JSON.stringify({ idToken, action: 'login' })
       }))
       .then(res => res.json())
       .then(data => {
-        if (data.success) window.location.href = '/dashboard';
+        if (data.success) {
+          window.location.href = '/dashboard';
+        } else if (data.needRegister) {
+          window.location.href = '/register?google=1';
+        } else if (data.redirectToLogin) {
+          window.location.href = '/login';
+        } else {
+          alert('Google login failed. Please try again.');
+        }
+      })
+      .catch(() => {
+        alert('Google login failed. Please try again.');
       });
   }
 
@@ -69,11 +82,22 @@
       .then(idToken => fetch('/auth/firebase-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken })
+        body: JSON.stringify({ idToken, action: 'login' })
       }))
       .then(res => res.json())
       .then(data => {
-        if (data.success) window.location.href = '/dashboard';
+        if (data.success) {
+          window.location.href = '/dashboard';
+        } else if (data.needRegister) {
+          window.location.href = '/register?facebook=1';
+        } else if (data.redirectToLogin) {
+          window.location.href = '/login';
+        } else {
+          alert('Facebook login failed. Please try again.');
+        }
+      })
+      .catch(() => {
+        alert('Facebook login failed. Please try again.');
       });
   }
 </script>

@@ -13,6 +13,8 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
+const User = require('./models/User'); // Import User model
+
 const app = express();
 
 // MongoDB Connection with status logging
@@ -50,14 +52,39 @@ app.get('/', (req, res) => {
   res.redirect('/login');
 });
 
-// Firebase login route
+// Firebase login/register route with best practice flow
 app.post('/auth/firebase-login', async (req, res) => {
-  const idToken = req.body.idToken;
+  const { idToken, action } = req.body;
   try {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
-    req.session.userId = decodedToken.uid;
-    // Optionally save user info to DB here
-    res.json({ success: true });
+    let user = await User.findOne({ firebaseUid: decodedToken.uid });
+
+    if (action === 'register') {
+      // If registering and user doesn't exist, create user
+      if (!user) {
+        user = await User.create({
+          firebaseUid: decodedToken.uid,
+          email: decodedToken.email,
+          name: decodedToken.name || '',
+          provider: decodedToken.firebase.sign_in_provider
+        });
+        return res.json({ success: false, redirectToLogin: true });
+      } else {
+        // Already registered, redirect to login
+        return res.json({ success: false, redirectToLogin: true });
+      }
+    } else if (action === 'login') {
+      // If logging in and user exists, log in
+      if (user) {
+        req.session.userId = user.firebaseUid;
+        req.session.provider = user.provider;
+        return res.json({ success: true });
+      } else {
+        // Not registered, redirect to register
+        return res.json({ success: false, needRegister: true });
+      }
+    }
+    res.status(400).json({ error: 'Invalid action' });
   } catch (error) {
     res.status(401).json({ error: 'Invalid token' });
   }

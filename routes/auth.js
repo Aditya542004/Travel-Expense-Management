@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const mongoose = require('mongoose');
 
 // Show registration form
 router.get('/register', (req, res) => {
@@ -18,7 +19,7 @@ router.post('/register', async (req, res) => {
     return res.render('register', { error: 'Passwords do not match.' });
   }
   try {
-    await User.create({ username, password });
+    await User.create({ username, password, provider: 'password' });
     res.redirect('/login');
   } catch (err) {
     let error = 'Registration failed. Username may already exist.';
@@ -40,7 +41,8 @@ router.post('/login', async (req, res) => {
   }
   const user = await User.findOne({ username });
   if (user && await user.comparePassword(password)) {
-    req.session.userId = user._id;
+    req.session.userId = user._id.toString();
+    req.session.provider = 'password';
     res.redirect('/dashboard');
   } else {
     res.render('login', { error: 'Invalid credentials' });
@@ -50,7 +52,23 @@ router.post('/login', async (req, res) => {
 // Dashboard (protected)
 router.get('/dashboard', async (req, res) => {
   if (!req.session.userId) return res.redirect('/login');
-  const user = await User.findById(req.session.userId);
+
+  let user = null;
+
+  // If userId is a valid ObjectId, try to find by _id (local user)
+  if (mongoose.Types.ObjectId.isValid(req.session.userId)) {
+    user = await User.findById(req.session.userId);
+  }
+  // If not found, or not a valid ObjectId, try to find by firebaseUid (Firebase user)
+  if (!user) {
+    user = await User.findOne({ firebaseUid: req.session.userId });
+  }
+
+  if (!user) {
+    req.session.destroy(() => res.redirect('/login'));
+    return;
+  }
+
   res.render('dashboard', { user });
 });
 
