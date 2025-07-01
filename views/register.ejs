@@ -39,11 +39,15 @@
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
 <script>
-  // Replace with your Firebase config
+  // Your Firebase config
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    // ...other config...
+    apiKey: "AIzaSyAbE-92t_uaDR_RpMjAi2cgytTqylwmm0A",
+    authDomain: "travel-and-expense-management.firebaseapp.com",
+    projectId: "travel-and-expense-management",
+    storageBucket: "travel-and-expense-management.appspot.com",
+    messagingSenderId: "118572373444",
+    appId: "1:118572373444:web:4672b5747be0041e0ec091",
+    measurementId: "G-RXEMTWDT9W"
   };
   firebase.initializeApp(firebaseConfig);
 
@@ -73,7 +77,6 @@
       }))
       .then(res => res.json())
       .then(data => {
-        if (data.success) window.location.href = '/dashboard';
-      });
+        if (data.success) window.location.href = '/dashboard'; });
   }
 </script>

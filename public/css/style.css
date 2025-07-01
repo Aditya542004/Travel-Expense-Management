@@ -368,7 +368,7 @@ tr:hover {
     margin-top: 30px;
     text-align: center;
   }
-  .dashboard-image img {
+  .dashboard-image img {   
     max-width: 90vw;
   }
 }
