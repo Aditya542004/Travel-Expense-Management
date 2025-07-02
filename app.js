@@ -54,33 +54,33 @@ app.get('/', (req, res) => {
 
 // Firebase login/register route with best practice flow
 app.post('/auth/firebase-login', async (req, res) => {
-  const { idToken, action } = req.body;
+  const { idToken, action, accountType } = req.body;
   try {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     let user = await User.findOne({ firebaseUid: decodedToken.uid });
 
     if (action === 'register') {
-      // If registering and user doesn't exist, create user
       if (!user) {
+        if (!accountType || !['manager', 'employee'].includes(accountType)) {
+          return res.status(400).json({ error: 'Account type is required' });
+        }
         user = await User.create({
           firebaseUid: decodedToken.uid,
           email: decodedToken.email,
           name: decodedToken.name || '',
-          provider: decodedToken.firebase.sign_in_provider
+          provider: decodedToken.firebase.sign_in_provider,
+          accountType
         });
         return res.json({ success: false, redirectToLogin: true });
       } else {
-        // Already registered, redirect to login
         return res.json({ success: false, redirectToLogin: true });
       }
     } else if (action === 'login') {
-      // If logging in and user exists, log in
       if (user) {
         req.session.userId = user.firebaseUid;
         req.session.provider = user.provider;
         return res.json({ success: true });
       } else {
-        // Not registered, redirect to register
         return res.json({ success: false, needRegister: true });
       }
     }

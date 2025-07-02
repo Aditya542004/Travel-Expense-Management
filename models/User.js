@@ -8,7 +8,12 @@ const userSchema = new mongoose.Schema({
   firebaseUid: { type: String, unique: true, sparse: true },
   email: { type: String, sparse: true },
   name: String,
-  provider: String // e.g., 'google.com', 'facebook.com', 'password'
+  provider: String, // e.g., 'google.com', 'facebook.com', 'password'
+  accountType: {
+    type: String,
+    enum: ['manager', 'employee'],
+    required: true
+  }
 });
 
 userSchema.pre('save', async function(next) {
