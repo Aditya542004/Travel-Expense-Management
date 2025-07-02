@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const mongoose = require('mongoose');
-const admin = require('firebase-admin');
 
 // Show registration form (local users)
 router.get('/register', (req, res) => {
@@ -23,7 +21,7 @@ router.post('/register', async (req, res) => {
     return res.render('register', { error: 'Invalid account type.' });
   }
   try {
-    await User.create({ username, password, provider: 'password', accountType });
+    await User.create({ username, password });
     res.redirect('/login');
   } catch (err) {
     console.error(err);
@@ -119,20 +117,7 @@ router.post('/google-login', async (req, res) => {
 // Dashboard (protected)
 router.get('/dashboard', async (req, res) => {
   if (!req.session.userId) return res.redirect('/login');
-
-  let user = null;
-
-  if (mongoose.Types.ObjectId.isValid(req.session.userId)) {
-    user = await User.findById(req.session.userId);
-  }
-  if (!user) {
-    user = await User.findOne({ firebaseUid: req.session.userId });
-  }
-  if (!user) {
-    req.session.destroy(() => res.redirect('/login'));
-    return;
-  }
-
+  const user = await User.findById(req.session.userId);
   res.render('dashboard', { user });
 });
 

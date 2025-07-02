@@ -1,8 +1,7 @@
 <%- include('partials/header') %>
 
 <h2 style="text-align:center;">Register</h2>
-
-<form method="POST" action="/register" class="register-form" id="registerForm">
+<form method="POST" action="/register" class="register-form">
   <div class="form-group">
     <label for="username">Username</label><br>
     <input id="username" name="username" placeholder="Enter a unique username" required autofocus>
@@ -27,8 +26,11 @@
 </form>
 
 <div class="social-login">
-  <button type="button" class="btn-google" onclick="googleSignup()">
-    <img src="/image/google-icon.png" alt="Google" class="icon"/> 
+  <button type="button" class="btn-google" onclick="googleLogin()">
+    <img src="/images/google-icon.png" alt="Google" class="icon"/> Register with Google
+  </button>
+  <button type="button" class="btn-facebook" onclick="facebookLogin()">
+    <img src="/images/facebook-icon.png" alt="Facebook" class="icon"/> Register with Facebook
   </button>
 </div>
 
@@ -57,10 +59,7 @@
     appId: "1:118572373444:web:4672b5747be0041e0ec091",
     measurementId: "G-RXEMTWDT9W"
   };
-
-  if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-  }
+  firebase.initializeApp(firebaseConfig);
 
   function googleSignup() {
     const accountType = document.getElementById('accountType').value;
@@ -72,24 +71,28 @@
     const provider = new firebase.auth.GoogleAuthProvider();
     firebase.auth().signInWithPopup(provider)
       .then(result => result.user.getIdToken())
-      .then(idToken => fetch('/auth/google-signup', {
+      .then(idToken => fetch('/auth/firebase-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken, accountType })
+        body: JSON.stringify({ idToken })
       }))
       .then(res => res.json())
       .then(data => {
-        if (data.message === 'Signup successful') {
-          window.location.href = '/dashboard';
-        } else if (data.message === 'User already exists') {
-          alert('User already registered. Please log in.');
-          window.location.href = '/login';
-        } else {
-          alert('Google registration failed. Please try again.');
-        }
-      })
-      .catch(() => {
-        alert('Google registration failed. Please try again.');
+        if (data.success) window.location.href = '/dashboard';
       });
+  }
+
+  function facebookLogin() {
+    const provider = new firebase.auth.FacebookAuthProvider();
+    firebase.auth().signInWithPopup(provider)
+      .then(result => result.user.getIdToken())
+      .then(idToken => fetch('/auth/firebase-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken })
+      }))
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) window.location.href = '/dashboard'; });
   }
 </script>

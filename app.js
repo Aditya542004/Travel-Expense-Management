@@ -13,6 +13,8 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
+const User = require('./models/User'); // Import User model
+
 const app = express();
 
 // MongoDB Connection
@@ -50,7 +52,20 @@ app.get('/', (req, res) => {
   res.redirect('/login');
 });
 
-// Auth routes (handles Google login & signup too)
+// Firebase login route
+app.post('/auth/firebase-login', async (req, res) => {
+  const idToken = req.body.idToken;
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    req.session.userId = decodedToken.uid;
+    // Optionally save user info to DB here
+    res.json({ success: true });
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+});
+
+// Auth routes
 app.use('/', require('./routes/auth'));
 
 // Protect /expenses routes

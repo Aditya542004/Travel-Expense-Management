@@ -16,7 +16,10 @@
 
 <div class="social-login">
   <button type="button" class="btn-google" onclick="googleLogin()">
-    <img src="/image/google-icon.png" alt="Google" class="icon"/> 
+    <img src="/images/google-icon.png" alt="Google" class="icon"/> Login with Google
+  </button>
+  <button type="button" class="btn-facebook" onclick="facebookLogin()">
+    <img src="/images/facebook-icon.png" alt="Facebook" class="icon"/> Login with Facebook
   </button>
 </div>
 
@@ -45,10 +48,7 @@
     appId: "1:118572373444:web:4672b5747be0041e0ec091",
     measurementId: "G-RXEMTWDT9W"
   };
-  
-  if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-  }
+  firebase.initializeApp(firebaseConfig);
 
   function googleLogin() {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -57,20 +57,26 @@
       .then(idToken => fetch('/auth/google-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken, action: 'login' })
+      }))
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) window.location.href = '/dashboard';
+      });
+  }
+
+  function facebookLogin() {
+    const provider = new firebase.auth.FacebookAuthProvider();
+    firebase.auth().signInWithPopup(provider)
+      .then(result => result.user.getIdToken())
+      .then(idToken => fetch('/auth/firebase-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idToken })
       }))
       .then(res => res.json())
       .then(data => {
-        if (data.message === 'Login successful') {
-          window.location.href = '/dashboard';
-        } else if (data.message === 'User not registered. Please sign up first.') {
-          window.location.href = '/register?google=1';
-        } else {
-          alert('Google login failed. Please try again.');
-        }
-      })
-      .catch(() => {
-        alert('Google login failed. Please try again.');
+        if (data.success) window.location.href = '/dashboard';
       });
   }
 </script>
