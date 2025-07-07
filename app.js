@@ -1,29 +1,20 @@
-require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const path = require('path');
+require('dotenv').config();
 
-// Firebase Admin SDK
-const admin = require('firebase-admin');
-const serviceAccount = require('./firebase-service-account.json');
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('MongoDB connected'))
+.catch((err) => console.error('MongoDB connection error:', err));
 
 const User = require('./models/User'); // Import User model
 
 const app = express();
-
-// MongoDB Connection
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('✅ MongoDB connected successfully!'))
-  .catch(err => {
-    console.error('❌ MongoDB connection error:', err);
-    process.exit(1);
-  });
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -52,21 +43,9 @@ app.get('/', (req, res) => {
   res.redirect('/login');
 });
 
-// Firebase login route
-app.post('/auth/firebase-login', async (req, res) => {
-  const idToken = req.body.idToken;
-  try {
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
-    req.session.userId = decodedToken.uid;
-    // Optionally save user info to DB here
-    res.json({ success: true });
-  } catch (error) {
-    res.status(401).json({ error: 'Invalid token' });
-  }
-});
-
 // Auth routes
-app.use('/', require('./routes/auth'));
+const authRoutes = require('./routes/auth');
+app.use('/api/auth', authRoutes);
 
 // Protect /expenses routes
 app.use('/expenses', (req, res, next) => {
