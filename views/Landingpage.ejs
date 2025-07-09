@@ -1,0 +1,33 @@
+<% /* Header/Navbar partial (inline, since partials/header.ejs is deleted) */ %>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Travel & Expense Management</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav>
+    <img src="/image/logo.png" alt="Logo" class="logo" style="height:40px;vertical-align:left;margin-right:500px;">
+    <% if (!userId) { %>
+      <a href="/login">Login</a>
+    <% } else { %>
+      <a href="/logout">Logout</a>
+    <% } %>
+  </nav>
+
+  <div class="dashboard-hero">
+    <div class="dashboard-content">
+      <div class="dashboard-title">Business Travel and Expense Management, Simplified.</div>
+      <div class="dashboard-desc">
+        Get complete control over managing travel expenses and gain visibility into your employee corporate travel and expense management.
+      </div>
+    </div>
+    <div class="dashboard-image">
+      <img src="https://clooper.com/blog/wp-content/uploads/2024/03/travel-expense-management-software.png" alt="Travel Dashboard" />
+    </div>
+  </div>
+
+  <% /* Footer partial (if available) */ %>
+  <%- typeof include === 'function' ? include('partials/footer') : '' %>
+</body>
+</html>

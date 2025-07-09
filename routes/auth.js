@@ -1,152 +1,77 @@
 const express = require('express');
+const router = express.Router();
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
-const router = express.Router();
+const JWT_SECRET = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30'; // Use process.env.JWT_SECRET in production
 
-// Show registration form (local users)
-router.get('/register', (req, res) => {
-  if (req.session.userId) return res.redirect('/dashboard');
-  res.render('register', { error: null });
-});
+function generateToken(user) {
+  return jwt.sign(
+    {
+      id: user._id,
+      email: user.email,
+      username: user.username,
+      accountType: user.accountType
+    },
+    JWT_SECRET,
+    { expiresIn: '1d' }
+  );
+}
 
-// Handle registration with password confirmation (local users)
-router.post('/register', async (req, res) => {
-  const { username, password, confirm_password, accountType } = req.body;
-  if (!username || !password || !confirm_password || !accountType) {
-    return res.render('register', { error: 'All fields are required.' });
-  }
-  if (password !== confirm_password) {
-    return res.render('register', { error: 'Passwords do not match.' });
-  }
-  // Check if username exists (pseudo code)
-  const existingUser = await User.findOne({ username });
-  if (existingUser) {
-    return res.render('register', { error: 'Username already exists.' });
-  }
-  // Save user (pseudo code)
-  await User.create({ username, password, accountType });
-  res.redirect('/login');
-});
-
-// Show login form (local users)
-router.get('/login', (req, res) => {
-  if (req.session.userId) return res.redirect('/dashboard');
-  res.render('login', { error: null });
-});
-
-// Handle login (local users)
-router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) {
-    return res.render('login', { error: 'Both fields are required.' });
-  }
-  const user = await User.findOne({ username });
-  if (user && await user.comparePassword(password)) {
-    req.session.userId = user._id.toString();
-    req.session.provider = 'password';
-    res.redirect('/dashboard');
-  } else {
-    res.render('login', { error: 'Invalid credentials' });
-  }
-});
-
-// Handle Google Signup
-router.post('/google-signup', async (req, res) => {
-  const { idToken, accountType } = req.body;
-  if (!idToken || !accountType) {
-    return res.status(400).json({ message: 'Token and account type required' });
-  }
-  if (!['manager', 'employee'].includes(accountType)) {
-    return res.status(400).json({ message: 'Invalid account type' });
-  }
+// API: Register (Signup)
+router.post('/signup', async (req, res) => {
   try {
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
-    const { uid, email, name } = decodedToken;
-
-    let user = await User.findOne({ firebaseUid: uid });
-    if (user) {
-      return res.status(400).json({ message: 'User already exists' });
+    const { username, email, password, confirm_password, accountType } = req.body;
+    if (!username || !email || !password || !confirm_password || !accountType) {
+      return res.status(400).json({ success: false, message: 'All fields are required' });
     }
-
-    user = new User({
-      firebaseUid: uid,
-      email,
-      name,
-      provider: 'google.com',
-      accountType
+    if (password !== confirm_password) {
+      return res.status(400).json({ success: false, message: 'Passwords do not match' });
+    }
+    if (!['manager', 'employee'].includes(accountType)) {
+      return res.status(400).json({ success: false, message: 'Invalid account type' });
+    }
+    if (await User.findOne({ email })) {
+      return res.status(400).json({ success: false, message: 'Email already exists' });
+    }
+    if (await User.findOne({ username })) {
+      return res.status(400).json({ success: false, message: 'Username already exists' });
+    }
+    const user = new User({ username, email, password, accountType });
+    await user.save();
+    const token = generateToken(user);
+    res.status(201).json({
+      success: true,
+      message: 'Signup successful',
+      token,
+      user: { username, email, accountType }
     });
-
-    await user.save();
-
-    req.session.userId = uid;
-    req.session.provider = 'google.com';
-
-    res.json({ message: 'Signup successful', user });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Signup failed' });
+    console.error('Signup error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
-// Handle Google Login
-router.post('/google-login', async (req, res) => {
-  const { idToken } = req.body;
-  if (!idToken) {
-    return res.status(400).json({ message: 'Token required' });
-  }
-  try {
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
-    const { uid } = decodedToken;
-
-    const user = await User.findOne({ firebaseUid: uid });
-    if (!user) {
-      return res.status(403).json({ message: 'User not registered. Please sign up first.' });
-    }
-
-    req.session.userId = uid;
-    req.session.provider = 'google.com';
-
-    res.json({ message: 'Login successful', user });
-  } catch (err) {
-    console.error(err);
-    res.status(401).json({ message: 'Invalid token' });
-  }
-});
-
-// Dashboard (protected)
-router.get('/dashboard', async (req, res) => {
-  if (!req.session.userId) return res.redirect('/login');
-  const user = await User.findById(req.session.userId);
-  res.render('dashboard', { user });
-});
-
-// Logout
-router.get('/logout', (req, res) => {
-  req.session.destroy(() => res.redirect('/login'));
-});
-
-router.post('/register', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const user = new User({ email, password });
-    await user.save();
-    res.status(201).json({ message: 'User registered' });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
+// API: Login
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email and password are required' });
+    }
     const user = await User.findOne({ email });
     if (!user || !(await user.comparePassword(password))) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
-    res.json({ token });
+    const token = generateToken(user);
+    res.json({
+      success: true,
+      message: 'Login successful',
+      token,
+      user: { username: user.username, email: user.email, accountType: user.accountType }
+    });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    console.error('Login error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 

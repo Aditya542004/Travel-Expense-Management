@@ -3,17 +3,12 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const path = require('path');
-const helmet = require('helmet');
-const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const User = require('./models/User'); // Make sure you have this model
 
 const app = express();
 
-// Security middleware
-app.use(helmet());
-app.use(cookieParser());
 
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI, {
@@ -32,11 +27,6 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
-  cookie: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 1000 * 60 * 60 * 24, // 1 day
-  }
 }));
 
 // View engine setup
@@ -54,73 +44,95 @@ app.use((req, res, next) => {
   next();
 });
 
-// Health check route
-app.get('/health', (req, res) => res.send('OK'));
+// Landing page
+app.get('/', (req, res) => {
+  res.render('landingpage');
+});
 
-// Login page
+// Show login page
 app.get('/login', (req, res) => {
   res.render('login');
 });
 
-// Register page
+// Show register page
 app.get('/register', (req, res) => {
   res.render('register');
 });
-
-// Handle login POST
+// Show register page
+app.get('/expenses', (req, res) => {
+  res.render('expenses', { expenses: [] }); // Always pass expenses array
+});
 app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email: username });
+    const user = await User.findOne({ email });
     if (!user || !(await user.comparePassword(password))) {
-      return res.render('login', { error: 'Invalid username or password' });
+      return res.json({ success: false, message: 'Invalid email or password' });
     }
+
+    // Store session details
     req.session.userId = user._id;
-    res.redirect('/dashboard');
+    req.session.accountType = user.accountType;
+
+    console.log('Logged in user:', user.email, 'Role:', user.accountType); // Debug log
+
+    // Send success response
+    return res.json({
+      success: true,
+      user: {
+        email: user.email,
+        accountType: user.accountType
+      }
+    });
   } catch (err) {
-    res.render('login', { error: 'An error occurred. Please try again.' });
+    console.error('Login error:', err);
+    return res.json({ success: false, message: 'Server error. Please try again.' });
   }
 });
 
+
 // Handle register POST
 app.post('/register', async (req, res) => {
-  const { username, password, confirm_password, accountType } = req.body;
+  const { username, email, password, confirm_password, accountType } = req.body;
   if (password !== confirm_password) {
     return res.render('register', { error: 'Passwords do not match' });
   }
   try {
-    const existing = await User.findOne({ email: username });
-    if (existing) {
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.render('register', { error: 'Email already exists' });
+    }
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
       return res.render('register', { error: 'Username already exists' });
     }
-    const user = new User({ email: username, password, accountType });
+    const user = new User({ username, email, password, accountType });
     await user.save();
     req.session.userId = user._id;
-    res.redirect('/dashboard');
+    req.session.accountType = user.accountType;
   } catch (err) {
     res.render('register', { error: 'Registration failed. Please try again.' });
   }
 });
 
-// Redirect root to dashboard or login
-app.get('/', (req, res) => {
-  if (req.session.userId) {
-    return res.redirect('/dashboard');
-  }
-  res.redirect('/login');
-});
-
-// Auth API routes (if you have any)
-const authRoutes = require('./routes/auth');
-app.use('/api/auth', authRoutes);
-
-// Protect /expenses routes
-app.use('/expenses', (req, res, next) => {
-  if (!req.session.userId) {
+app.get('/manager/dashboard', (req, res) => {
+  if (!req.session.userId || req.session.accountType !== 'manager') {
     return res.redirect('/login');
   }
-  next();
-}, require('./routes/expenses'));
+  res.render('manager_dashboard');
+});
+
+app.get('/employee/dashboard', (req, res) => {
+  if (!req.session.userId || req.session.accountType !== 'employee') {
+    return res.redirect('/login');
+  }
+  res.render('employee_dashboard');
+});
+
+// Logout
+app.get('/logout', (req, res) => {
+  req.session.destroy(() => res.redirect('/login'));
+});
 
 // 404 handler
 app.use((req, res) => {

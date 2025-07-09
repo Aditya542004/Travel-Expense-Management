@@ -1,23 +1,46 @@
-<%- include('partials/header') %>
-<h2>Your Expenses</h2>
-<form method="POST" action="/expenses/add">
-  <input type="date" name="date" required>
-  <input name="category" placeholder="Category" required>
-  <input name="amount" type="number" placeholder="Amount" required>
-  <input name="description" placeholder="Description">
-  <button type="submit">Add Expense</button>
-</form>
-<table>
-  <tr>
-    <th>Date</th><th>Category</th><th>Amount</th><th>Description</th>
-  </tr>
-  <% expenses.forEach(exp => { %>
-    <tr>
-      <td><%= exp.date.toISOString().slice(0,10) %></td>
-      <td><%= exp.category %></td>
-      <td><%= exp.amount %></td>
-      <td><%= exp.description %></td>
-    </tr>
-  <% }) %>
-</table>
-<%- include('partials/footer') %>
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav>
+    <img src="/image/logo.png" alt="Logo" class="logo" style="height:40px;vertical-align:left;margin-right:500px;">
+    <a href="javascript:history.back()" class="btn-primary" style="margin-left:auto;">Back</a>
+  </nav>
+
+  <div class="table-container">
+    <div class="expenses-title">Your Expenses</div>
+    <form method="POST" action="/expenses/add" class="auth-form" style="margin-bottom:2em;">
+      <div style="display:flex; gap:1em; flex-wrap:wrap;">
+        <input type="date" name="date" required>
+        <input name="category" placeholder="Category" required>
+        <input name="amount" type="number" placeholder="Amount" required>
+        <input name="description" placeholder="Description">
+        <button type="submit" class="btn-primary" style="min-width:120px;">Add Expense</button>
+      </div>
+    </form>
+    <% if (expenses.length === 0) { %>
+      <div class="expenses-empty">No expenses found. Start by adding a new expense!</div>
+    <% } else { %>
+      <table class="expenses-table">
+        <tr>
+          <th>Date</th>
+          <th>Category</th>
+          <th>Amount</th>
+          <th>Description</th>
+        </tr>
+        <% expenses.forEach(exp => { %>
+          <tr>
+            <td><%= exp.date ? exp.date.toISOString().slice(0,10) : '' %></td>
+            <td><%= exp.category %></td>
+            <td><%= exp.amount %></td>
+            <td><%= exp.description %></td>
+          </tr>
+        <% }) %>
+      </table>
+    <% } %>
+  </div>
+  <%- typeof include === 'function' ? include('partials/footer') : '' %>
+</body>
+</html>

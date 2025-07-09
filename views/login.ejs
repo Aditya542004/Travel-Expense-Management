@@ -1,36 +1,61 @@
-<%- include('partials/header') %>
-
-<h2 style="text-align:center;">Login</h2>
-
-<form method="POST" action="/login" class="login-form">
-  <div class="form-group">
-    <label for="username">Username</label><br>
-    <input id="username" name="username" placeholder="Username" required autofocus>
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="auth-container">
+  <div class="auth-card">
+    <h2 class="auth-title">Login</h2>
+    <p id="login-error" class="error-message" style="display:none;"></p>
+    <form id="login-form" class="auth-form">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" placeholder="Email" required autofocus>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" placeholder="Password" required>
+      </div>
+      <button type="submit" class="btn-primary">Login</button>
+    </form>
+    <p class="auth-link">
+      Don't have an account?
+      <a href="/register">Register here</a>
+    </p>
   </div>
-  <div class="form-group">
-    <label for="password">Password</label><br>
-    <input id="password" name="password" type="password" placeholder="Password" required>
-  </div>
-  <button type="submit" class="btn-primary">Login</button>
-</form>
-
-<!-- Social login buttons are disabled until implemented with Passport.js or similar -->
-<div class="social-login">
-  <button type="button" class="btn-google" disabled title="Coming soon">
-    <img src="/image/google-icon.png" alt="Google" class="icon"/> Login with Google
-  </button>
-  <button type="button" class="btn-facebook" disabled title="Coming soon">
-    <img src="/image/facebook-icon.png" alt="Facebook" class="icon"/> Login with Facebook
-  </button>
 </div>
 
-<% if (typeof error !== 'undefined' && error) { %>
-  <p class="error-message"><%= error %></p>
-<% } %>
+<script>
+  document.getElementById('login-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const errorEl = document.getElementById('login-error');
+    errorEl.style.display = 'none';
+    errorEl.textContent = '';
+    try {
+      const res = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (data.user.accountType === 'manager') {
+          window.location.href = '/manager/dashboard';
+        } else {
+          window.location.href = '/employee/dashboard';
+        }
+      } else {
+        errorEl.textContent = data.message || 'Login failed';
+        errorEl.style.display = 'block';
+      }
+    } catch (err) {
+      errorEl.textContent = 'Server error. Please try again.';
+      errorEl.style.display = 'block';
+    }
+  });
+</script>
 
-<p class="register-link">
-  Don't have an account?
-  <a href="/register">Register here</a>
-</p>
-
-<%- include('partials/footer') %>
+<%- typeof include === 'function' ? include('partials/footer') : '' %>
