@@ -25,12 +25,13 @@
   <button type="submit" class="btn-primary">Register</button>
 </form>
 
+<!-- Social login buttons are disabled until implemented with Passport.js or similar -->
 <div class="social-login">
-  <button type="button" class="btn-google" onclick="googleLogin()">
-    <img src="/images/google-icon.png" alt="Google" class="icon"/> Register with Google
+  <button type="button" class="btn-google" disabled title="Coming soon">
+    <img src="/image/google-icon.png" alt="Google" class="icon"/> Register with Google
   </button>
-  <button type="button" class="btn-facebook" onclick="facebookLogin()">
-    <img src="/images/facebook-icon.png" alt="Facebook" class="icon"/> Register with Facebook
+  <button type="button" class="btn-facebook" disabled title="Coming soon">
+    <img src="/image/facebook-icon.png" alt="Facebook" class="icon"/> Register with Facebook
   </button>
 </div>
 
@@ -44,55 +45,3 @@
 </p>
 
 <%- include('partials/footer') %>
-
-<!-- Firebase JS SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
-<script>
-  // Your Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyAbE-92t_uaDR_RpMjAi2cgytTqylwmm0A",
-    authDomain: "travel-and-expense-management.firebaseapp.com",
-    projectId: "travel-and-expense-management",
-    storageBucket: "travel-and-expense-management.appspot.com",
-    messagingSenderId: "118572373444",
-    appId: "1:118572373444:web:4672b5747be0041e0ec091",
-    measurementId: "G-RXEMTWDT9W"
-  };
-  firebase.initializeApp(firebaseConfig);
-
-  function googleSignup() {
-    const accountType = document.getElementById('accountType').value;
-    if (!accountType) {
-      alert('Please select an account type before registering.');
-      return;
-    }
-
-    const provider = new firebase.auth.GoogleAuthProvider();
-    firebase.auth().signInWithPopup(provider)
-      .then(result => result.user.getIdToken())
-      .then(idToken => fetch('/auth/firebase-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken })
-      }))
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) window.location.href = '/dashboard';
-      });
-  }
-
-  function facebookLogin() {
-    const provider = new firebase.auth.FacebookAuthProvider();
-    firebase.auth().signInWithPopup(provider)
-      .then(result => result.user.getIdToken())
-      .then(idToken => fetch('/auth/firebase-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken })
-      }))
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) window.location.href = '/dashboard'; });
-  }
-</script>

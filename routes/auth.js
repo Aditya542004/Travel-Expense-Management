@@ -18,16 +18,14 @@ router.post('/register', async (req, res) => {
   if (password !== confirm_password) {
     return res.render('register', { error: 'Passwords do not match.' });
   }
-  if (!['manager', 'employee'].includes(accountType)) {
-    return res.render('register', { error: 'Invalid account type.' });
+  // Check if username exists (pseudo code)
+  const existingUser = await User.findOne({ username });
+  if (existingUser) {
+    return res.render('register', { error: 'Username already exists.' });
   }
-  try {
-    await User.create({ username, password });
-    res.redirect('/login');
-  } catch (err) {
-    console.error(err);
-    res.render('register', { error: 'Registration failed. Username may already exist.' });
-  }
+  // Save user (pseudo code)
+  await User.create({ username, password, accountType });
+  res.redirect('/login');
 });
 
 // Show login form (local users)
