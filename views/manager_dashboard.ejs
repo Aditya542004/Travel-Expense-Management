@@ -2,9 +2,128 @@
 <html>
 <head>
   <title>Manager Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <h1>Welcome to the Manager Dashboard</h1>
-  <p>Only accessible to users with manager role.</p>
+  <nav>
+    <img src="/image/logo.png" alt="Logo" class="logo" style="height:40px;vertical-align:left;margin-right:500px;">
+    <a href="/logout">Logout</a>
+  </nav>
+
+  <div class="dashboard-container">
+    <!-- Header -->
+    <header class="dashboard-header">
+      <h1 class="dashboard-title">Manager Dashboard</h1>
+      <div class="user-info">
+        <span class="user-role">Manager View</span>
+      </div>
+    </header>
+
+    <div class="dashboard-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="dashboard-sidebar">
+        <h2 class="sidebar-title">Navigation</h2>
+        <ul class="sidebar-nav">
+          <li><a href="#" class="sidebar-link active">Dashboard</a></li>
+          <li><a href="/expenses" class="sidebar-link">View All Expenses</a></li>
+          <li><a href="#" class="sidebar-link">Reports</a></li>
+          <li><a href="#" class="sidebar-link">Settings</a></li>
+        </ul>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="dashboard-main">
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3 class="stat-label">Pending Approvals</h3>
+            <p class="stat-value">1</p>
+          </div>
+          <div class="stat-card">
+            <h3 class="stat-label">Total Reviewed</h3>
+            <p class="stat-value">2</p>
+          </div>
+          <div class="stat-card">
+            <h3 class="stat-label">Avg Approval Time</h3>
+            <p class="stat-value">2 days</p>
+          </div>
+          <div class="stat-card">
+            <h3 class="stat-label">Budget Utilized</h3>
+            <p class="stat-value">68%</p>
+          </div>
+        </div>
+
+        <!-- Pending Approvals Table -->
+        <div class="dashboard-table-container">
+          <h2 class="table-title">Pending Approvals</h2>
+          <div class="table-wrapper">
+            <table class="dashboard-table">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Expense</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>John Doe</td>
+                  <td>Hotel Stay</td>
+                  <td>$120</td>
+                  <td><span class="status-badge status-pending">Pending</span></td>
+                  <td class="action-buttons">
+                    <button class="action-btn approve-btn">Approve</button>
+                    <button class="action-btn reject-btn">Reject</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Jane Smith</td>
+                  <td>Flight Ticket</td>
+                  <td>$300</td>
+                  <td><span class="status-badge status-approved">Approved</span></td>
+                  <td class="action-buttons">
+                    <button class="action-btn approve-btn" disabled>Approved</button>
+                    <button class="action-btn reject-btn" disabled>Reject</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Alice Johnson</td>
+                  <td>Dinner with Client</td>
+                  <td>$75</td>
+                  <td><span class="status-badge status-rejected">Rejected</span></td>
+                  <td class="action-buttons">
+                    <button class="action-btn approve-btn" disabled>Approve</button>
+                    <button class="action-btn reject-btn" disabled>Rejected</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3 class="chart-title">Expense Chart</h3>
+            <div class="chart-placeholder">
+              <img src="https://placehold.co/600x200?text=Expense+Chart" alt="Expense Chart" class="chart-image">
+            </div>
+          </div>
+          <div class="chart-card">
+            <h3 class="chart-title">Approval Trend</h3>
+            <div class="chart-placeholder">
+              <img src="https://placehold.co/600x200?text=Approval+Trend" alt="Approval Trend" class="chart-image">
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <footer class="dashboard-footer">
+    <p>&copy; 2025 Travel Expense Management System</p>
+  </footer>
 </body>
 </html>

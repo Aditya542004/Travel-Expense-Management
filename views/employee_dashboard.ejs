@@ -7,21 +7,121 @@
 <body>
   <nav>
     <img src="/image/logo.png" alt="Logo" class="logo" style="height:40px;vertical-align:left;margin-right:500px;">
-    <% if (!userId) { %>
-      <a href="/login">Login</a>
-      <a href="/register">Register</a>
-    <% } else { %>
-      <a href="/logout">Logout</a>
-    <% } %>
+    <a href="/logout">Logout</a>
   </nav>
-  <div class="container" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:70vh;">
-    <div class="auth-card" style="max-width:500px;">
-      <h1 class="auth-title">Welcome to the Employee Dashboard</h1>
-      <p style="text-align:center; margin-bottom:2em;">Only accessible to users with the <b>employee</b> role.</p>
-      <a href="/expenses" class="btn-primary" style="text-align:center;">View My Expenses</a>
+
+  <div class="dashboard-container">
+    <!-- Header -->
+    <header class="dashboard-header">
+      <h1 class="dashboard-title">Employee Dashboard</h1>
+      <div class="user-info">
+        <span class="user-role">Employee View</span>
+      </div>
+    </header>
+
+    <div class="dashboard-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="dashboard-sidebar">
+        <h2 class="sidebar-title">Navigation</h2>
+        <ul class="sidebar-nav">
+          <li><a href="#" class="sidebar-link active">Dashboard</a></li>
+          <li><a href="/expenses" class="sidebar-link">Submit New Expense</a></li>
+          <li><a href="#" class="sidebar-link">Reports</a></li>
+          <li><a href="#" class="sidebar-link">Settings</a></li>
+        </ul>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="dashboard-main">
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3 class="stat-label">Total Submitted</h3>
+            <p class="stat-value">$495</p>
+          </div>
+          <div class="stat-card">
+            <h3 class="stat-label">Pending</h3>
+            <p class="stat-value">$150</p>
+          </div>
+          <div class="stat-card">
+            <h3 class="stat-label">Approved</h3>
+            <p class="stat-value">$300</p>
+          </div>
+          <div class="stat-card">
+            <h3 class="stat-label">Rejected</h3>
+            <p class="stat-value">$45</p>
+          </div>
+        </div>
+
+        <!-- Recent Expenses Table -->
+        <div class="dashboard-table-container">
+          <h2 class="table-title">Recent Expenses</h2>
+          <div class="table-wrapper">
+            <table class="dashboard-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Category</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2025-03-01</td>
+                  <td>Hotel Stay</td>
+                  <td>Accommodation</td>
+                  <td>$120</td>
+                  <td><span class="status-badge status-pending">Pending</span></td>
+                </tr>
+                <tr>
+                  <td>2025-03-02</td>
+                  <td>Flight Ticket</td>
+                  <td>Travel</td>
+                  <td>$300</td>
+                  <td><span class="status-badge status-approved">Approved</span></td>
+                </tr>
+                <tr>
+                  <td>2025-03-03</td>
+                  <td>Dinner with Client</td>
+                  <td>Meals</td>
+                  <td>$75</td>
+                  <td><span class="status-badge status-rejected">Rejected</span></td>
+                </tr>
+                <tr>
+                  <td>2025-03-05</td>
+                  <td>Taxi Ride</td>
+                  <td>Transport</td>
+                  <td>$30</td>
+                  <td><span class="status-badge status-pending">Pending</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3 class="chart-title">Expense Chart</h3>
+            <div class="chart-placeholder">
+              <img src="https://placehold.co/600x200?text=Expense+Chart" alt="Expense Chart" class="chart-image">
+            </div>
+          </div>
+          <div class="chart-card">
+            <h3 class="chart-title">Approval Trend</h3>
+            <div class="chart-placeholder">
+              <img src="https://placehold.co/600x200?text=Approval+Trend" alt="Approval Trend" class="chart-image">
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   </div>
-  <% /* Footer partial (if available) */ %>
-  <%- typeof include === 'function' ? include('partials/footer') : '' %>
+
+  <footer class="dashboard-footer">
+    <p>&copy; 2025 Travel Expense Management System</p>
+  </footer>
 </body>
 </html>
