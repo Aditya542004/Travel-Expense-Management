@@ -18,15 +18,15 @@ router.post('/add', async (req, res) => {
   const { date, category, amount, description } = req.body;
   try {
     await Expense.create({
-      user: req.session.userId,
+      userId: req.session.userId,
       date,
       category,
-      amount,
+      amount: Number(amount),
       description
     });
     res.redirect('/expenses');
   } catch (err) {
-    const expenses = await Expense.find({ user: req.session.userId });
+    const expenses = await Expense.find({ userId: req.session.userId });
     res.render('expenses', { expenses, error: 'Failed to add expense.' });
   }
 });

@@ -6,6 +6,7 @@ const path = require('path');
 require('dotenv').config();
 
 const User = require('./models/User'); // Make sure you have this model
+const employeeRoutes = require('./routes/employee');
 
 const app = express();
 
@@ -128,6 +129,8 @@ app.get('/employee/dashboard', (req, res) => {
   }
   res.render('employee_dashboard');
 });
+
+app.use('/api/employee', employeeRoutes);
 
 // Logout
 app.get('/logout', (req, res) => {

@@ -11,6 +11,9 @@
 
   <div class="table-container">
     <div class="expenses-title">Your Expenses</div>
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="error-message"><%= error %></div>
+    <% } %>
     <form method="POST" action="/expenses/add" class="auth-form" style="margin-bottom:2em;">
       <div style="display:flex; gap:1em; flex-wrap:wrap;">
         <input type="date" name="date" required>
