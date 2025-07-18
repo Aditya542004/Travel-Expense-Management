@@ -4,7 +4,8 @@ const Expense = require('../models/Expense');
 
 // ✅ Get employee expense stats
 router.get('/stats', async (req, res) => {
-  const userId = req.user._id; // or however you store current logged-in user
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
     const total = await Expense.countDocuments({ userId });
@@ -20,11 +21,12 @@ router.get('/stats', async (req, res) => {
 
 // ✅ Get recent employee expenses
 router.get('/expenses', async (req, res) => {
-  const userId = req.user._id;
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
     const expenses = await Expense.find({ userId })
-      .sort({ date: -1 }) // most recent first
+      .sort({ date: -1 })
       .limit(10);
 
     res.json(expenses);

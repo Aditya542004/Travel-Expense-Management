@@ -7,6 +7,7 @@ require('dotenv').config();
 
 const User = require('./models/User'); // Make sure you have this model
 const employeeRoutes = require('./routes/employee');
+const expensesRoutes = require('./routes/expenses');
 
 const app = express();
 
@@ -59,10 +60,7 @@ app.get('/login', (req, res) => {
 app.get('/register', (req, res) => {
   res.render('register');
 });
-// Show register page
-app.get('/expenses', (req, res) => {
-  res.render('expenses', { expenses: [] }); // Always pass expenses array
-});
+
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -131,6 +129,7 @@ app.get('/employee/dashboard', (req, res) => {
 });
 
 app.use('/api/employee', employeeRoutes);
+app.use('/expenses', expensesRoutes);
 
 // Logout
 app.get('/logout', (req, res) => {

@@ -24,10 +24,51 @@ router.post('/add', async (req, res) => {
       amount: Number(amount),
       description
     });
-    res.redirect('/expenses');
+    res.redirect('/employee/dashboard');
   } catch (err) {
     const expenses = await Expense.find({ userId: req.session.userId });
     res.render('expenses', { expenses, error: 'Failed to add expense.' });
+  }
+});
+
+// Manager: Get all expenses (for dashboard)
+router.get('/all', async (req, res) => {
+  // Optionally, check if user is manager
+  try {
+    const expenses = await Expense.find({})
+      .populate('userId', 'username email')
+      .sort({ date: -1 });
+    res.json(expenses);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch all expenses.' });
+  }
+});
+
+// Manager: Approve an expense
+router.post('/:id/approve', async (req, res) => {
+  try {
+    const expense = await Expense.findByIdAndUpdate(
+      req.params.id,
+      { status: 'Approved' },
+      { new: true }
+    );
+    res.json(expense);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to approve expense.' });
+  }
+});
+
+// Manager: Reject an expense
+router.post('/:id/reject', async (req, res) => {
+  try {
+    const expense = await Expense.findByIdAndUpdate(
+      req.params.id,
+      { status: 'Rejected' },
+      { new: true }
+    );
+    res.json(expense);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to reject expense.' });
   }
 });
 

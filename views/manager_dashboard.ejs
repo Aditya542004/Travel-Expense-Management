@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Manager Dashboard</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
+
 <body>
   <nav>
     <img src="/image/logo.png" alt="Logo" class="logo" style="height:40px;vertical-align:left;margin-right:500px;">
@@ -11,7 +13,6 @@
   </nav>
 
   <div class="dashboard-container">
-    <!-- Header -->
     <header class="dashboard-header">
       <h1 class="dashboard-title">Manager Dashboard</h1>
       <div class="user-info">
@@ -37,22 +38,21 @@
         <div class="stats-grid">
           <div class="stat-card">
             <h3 class="stat-label">Pending Approvals</h3>
-            <p class="stat-value">1</p>
+            <p class="stat-value" id="stat-pending">0</p>
           </div>
           <div class="stat-card">
             <h3 class="stat-label">Total Reviewed</h3>
-            <p class="stat-value">2</p>
+            <p class="stat-value" id="stat-reviewed">0</p>
           </div>
           <div class="stat-card">
-            <h3 class="stat-label">Avg Approval Time</h3>
-            <p class="stat-value">2 days</p>
+            <h3 class="stat-label">Approved</h3>
+            <p class="stat-value" id="stat-approved">0</p>
           </div>
           <div class="stat-card">
-            <h3 class="stat-label">Budget Utilized</h3>
-            <p class="stat-value">68%</p>
+            <h3 class="stat-label">Rejected</h3>
+            <p class="stat-value" id="stat-rejected">0</p>
           </div>
         </div>
-
         <!-- Pending Approvals Table -->
         <div class="dashboard-table-container">
           <h2 class="table-title">Pending Approvals</h2>
@@ -67,54 +67,24 @@
                   <th>Action</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td>John Doe</td>
-                  <td>Hotel Stay</td>
-                  <td>$120</td>
-                  <td><span class="status-badge status-pending">Pending</span></td>
-                  <td class="action-buttons">
-                    <button class="action-btn approve-btn">Approve</button>
-                    <button class="action-btn reject-btn">Reject</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Jane Smith</td>
-                  <td>Flight Ticket</td>
-                  <td>$300</td>
-                  <td><span class="status-badge status-approved">Approved</span></td>
-                  <td class="action-buttons">
-                    <button class="action-btn approve-btn" disabled>Approved</button>
-                    <button class="action-btn reject-btn" disabled>Reject</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Alice Johnson</td>
-                  <td>Dinner with Client</td>
-                  <td>$75</td>
-                  <td><span class="status-badge status-rejected">Rejected</span></td>
-                  <td class="action-buttons">
-                    <button class="action-btn approve-btn" disabled>Approve</button>
-                    <button class="action-btn reject-btn" disabled>Rejected</button>
-                  </td>
-                </tr>
+              <tbody id="expenses-tbody">
+                <!-- Expenses will be loaded here -->
               </tbody>
             </table>
           </div>
         </div>
-
         <!-- Charts Section -->
         <div class="charts-grid">
           <div class="chart-card">
             <h3 class="chart-title">Expense Chart</h3>
             <div class="chart-placeholder">
-              <img src="https://placehold.co/600x200?text=Expense+Chart" alt="Expense Chart" class="chart-image">
+              <canvas id="expenseChart" class="chart-image"></canvas>
             </div>
           </div>
           <div class="chart-card">
             <h3 class="chart-title">Approval Trend</h3>
             <div class="chart-placeholder">
-              <img src="https://placehold.co/600x200?text=Approval+Trend" alt="Approval Trend" class="chart-image">
+              <canvas id="approvalChart" class="chart-image"></canvas>
             </div>
           </div>
         </div>
@@ -125,5 +95,125 @@
   <footer class="dashboard-footer">
     <p>&copy; 2025 Travel Expense Management System</p>
   </footer>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    function updateManagerDashboard() {
+      fetch('/expenses/all')
+        .then(res => res.json())
+        .then(expenses => {
+          // Stats
+          let pending = 0, reviewed = 0, approved = 0, rejected = 0;
+          const categoryTotals = {};
+          const approvalTrend = {};
+          expenses.forEach(exp => {
+            if (exp.status === 'Pending') pending++;
+            if (exp.status === 'Approved') approved++;
+            if (exp.status === 'Rejected') rejected++;
+            if (exp.status !== 'Pending') reviewed++;
+            // Category totals
+            if (exp.category) {
+              categoryTotals[exp.category] = (categoryTotals[exp.category] || 0) + (exp.amount || 0);
+            }
+            // Approval trend by date
+            if (exp.date && exp.status) {
+              const dateStr = new Date(exp.date).toISOString().slice(0, 10);
+              if (!approvalTrend[dateStr]) approvalTrend[dateStr] = { Approved: 0, Pending: 0, Rejected: 0 };
+              approvalTrend[dateStr][exp.status] += 1;
+            }
+          });
+          document.getElementById('stat-pending').textContent = pending;
+          document.getElementById('stat-reviewed').textContent = reviewed;
+          document.getElementById('stat-approved').textContent = approved;
+          document.getElementById('stat-rejected').textContent = rejected;
+          // Table
+          const tbody = document.getElementById('expenses-tbody');
+          tbody.innerHTML = '';
+          if (expenses.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#888;">No expenses found.</td></tr>';
+          } else {
+            expenses.forEach(exp => {
+              const statusClass = exp.status === 'Approved' ? 'status-approved' : (exp.status === 'Rejected' ? 'status-rejected' : 'status-pending');
+              const approveDisabled = exp.status !== 'Pending' ? 'disabled' : '';
+              const rejectDisabled = exp.status !== 'Pending' ? 'disabled' : '';
+              const approveLabel = exp.status === 'Approved' ? 'Approved' : 'Approve';
+              const rejectLabel = exp.status === 'Rejected' ? 'Rejected' : 'Reject';
+              tbody.innerHTML += `
+                <tr>
+                  <td>${exp.userId && exp.userId.username ? exp.userId.username : 'Unknown'}</td>
+                  <td>${exp.description || ''}</td>
+                  <td>$${exp.amount != null ? exp.amount : ''}</td>
+                  <td><span class="status-badge ${statusClass}">${exp.status || 'Pending'}</span></td>
+                  <td class="action-buttons">
+                    <button class="action-btn approve-btn" data-id="${exp._id}" ${approveDisabled}>${approveLabel}</button>
+                    <button class="action-btn reject-btn" data-id="${exp._id}" ${rejectDisabled}>${rejectLabel}</button>
+                  </td>
+                </tr>
+              `;
+            });
+          }
+          // Button handlers
+          document.querySelectorAll('.approve-btn').forEach(btn => {
+            btn.onclick = function() {
+              const id = this.getAttribute('data-id');
+              fetch(`/expenses/${id}/approve`, { method: 'POST' })
+                .then(res => res.json())
+                .then(() => updateManagerDashboard());
+            };
+          });
+          document.querySelectorAll('.reject-btn').forEach(btn => {
+            btn.onclick = function() {
+              const id = this.getAttribute('data-id');
+              fetch(`/expenses/${id}/reject`, { method: 'POST' })
+                .then(res => res.json())
+                .then(() => updateManagerDashboard());
+            };
+          });
+          // --- Chart.js: Expense by Category ---
+          const ctx1 = document.getElementById('expenseChart').getContext('2d');
+          if (window.expenseChartInstance) window.expenseChartInstance.destroy();
+          window.expenseChartInstance = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+              labels: Object.keys(categoryTotals),
+              datasets: [{
+                label: 'Total Amount',
+                data: Object.values(categoryTotals),
+                backgroundColor: 'rgba(95,46,234,0.6)'
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true } }
+            }
+          });
+          // Approval Trend Line Chart
+          const dates = Object.keys(approvalTrend).sort();
+          const approvedData = dates.map(d => approvalTrend[d].Approved);
+          const pendingData = dates.map(d => approvalTrend[d].Pending);
+          const rejectedData = dates.map(d => approvalTrend[d].Rejected);
+          const ctx2 = document.getElementById('approvalChart').getContext('2d');
+          if (window.approvalChartInstance) window.approvalChartInstance.destroy();
+          window.approvalChartInstance = new Chart(ctx2, {
+            type: 'line',
+            data: {
+              labels: dates,
+              datasets: [
+                { label: 'Approved', data: approvedData, borderColor: '#28a745', backgroundColor: 'rgba(40,167,69,0.1)', fill: true },
+                { label: 'Pending', data: pendingData, borderColor: '#ffc107', backgroundColor: 'rgba(255,193,7,0.1)', fill: true },
+                { label: 'Rejected', data: rejectedData, borderColor: '#dc3545', backgroundColor: 'rgba(220,53,69,0.1)', fill: true }
+              ]
+            },
+            options: {
+              responsive: true,
+              plugins: { legend: { display: true } },
+              scales: { y: { beginAtZero: true } }
+            }
+          });
+        });
+    }
+    updateManagerDashboard();
+  </script>
 </body>
+
 </html>
