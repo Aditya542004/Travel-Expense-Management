@@ -10,89 +10,76 @@ body {
   flex-direction: column;
 }
 
-/* Header & Footer */
-header,
-footer {
-  background: #fff;
-  color: #232526;
-  padding: 1.5em 0;
-  text-align: center;
-  letter-spacing: 1px;
-  box-shadow: 0 2px 16px rgba(95, 46, 234, 0.06);
-  position: relative;
-  z-index: 10;
-}
-
-footer {
-  margin-top: auto;
-  font-size: 1em;
-  letter-spacing: 0.5px;
-  background: #fff;
-  color: #232526;
-  padding: 1.2em 0;
-  text-align: center;
-  box-shadow: 0 -2px 8px rgba(95, 46, 234, 0.06);
-}
-
+/* Base Navbar */
 nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
-  border-radius: 32px;
-  box-shadow: 0 2px 16px rgba(95, 46, 234, 0.06);
-  padding: 1.5em 10em;
-  margin: 3em auto;
-  max-width: 3200px;
-  min-width: 400px;
-  min-height: 40px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  padding: 1.2em 3em;
+  margin: 2em auto;
+  max-width: 1200px;
+  flex-wrap: wrap;
 }
 
+/* Logo */
+.logo {
+  height: 42px;
+  display: block;
+}
+
+/* Nav links container */
 .nav-links {
   display: flex;
-  gap: 1.5em;
-  flex: 1;
-  justify-content: flex-end;
+  align-items: center;
+  gap: 1em;
 }
 
+/* Nav link styling */
 nav a {
   color: #232526;
   text-decoration: none;
   font-weight: 500;
-  font-size: 1.08em;
-  padding: 0.5em 1.5em;
-  border-radius: 22px;
-  letter-spacing: 0.5px;
-  transition: color 0.2s, background 0.2s, box-shadow 0.2s;
+  font-size: 1em;
+  padding: 0.6em 1.2em;
+  border-radius: 999px;
+  transition: all 0.3s ease;
   background: transparent;
-  box-shadow: none;
-  display: inline-block;
 }
 
+/* Hover & active link */
 nav a:hover,
 nav a.active {
   color: #fff;
   background: linear-gradient(90deg, #5f2eea 0%, #ff3576 100%);
-  box-shadow: 0 2px 8px rgba(95, 46, 234, 0.08);
+  box-shadow: 0 4px 10px rgba(95, 46, 234, 0.1);
 }
 
-/* Responsive Navbar */
-@media (max-width: 800px) {
+/* Responsive Design */
+@media (max-width: 768px) {
   nav {
     flex-direction: column;
     align-items: flex-start;
-    padding: 1em 1em;
-    min-height: unset;
+    padding: 1em 1.5em;
   }
 
   .nav-links {
     width: 100%;
-    justify-content: flex-start;
-    gap: 0.5em;
-    margin-top: 0.7em;
-    flex-wrap: wrap;
+    margin-top: 1em;
+    gap: 0.75em;
+    flex-direction: column;
+  }
+
+  nav a {
+    width: 100%;
+    text-align: left;
+    padding: 0.8em 1em;
+    font-size: 1rem;
   }
 }
+
 
 /* Container */
 .container {
@@ -1102,6 +1089,7 @@ tr:hover {
   padding: 3rem 1rem;
   background: #fff;
 }
+
 .section-title {
   text-align: center;
   font-size: 2.5rem;
@@ -1109,6 +1097,7 @@ tr:hover {
   color: #5f2eea;
   margin-bottom: 1rem;
 }
+
 .testimonials-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
