@@ -4,19 +4,113 @@
 <head>
   <title>Manager Dashboard</title>
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .user-icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.2em 0.5em;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+    .user-icon-svg {
+      width: 2.1em;
+      height: 2.1em;
+      fill: #5f2eea;
+      border-radius: 50%;
+      background: #f4f7fb;
+      box-shadow: 0 2px 8px rgba(95,46,234,0.08);
+      transition: background 0.2s;
+    }
+    .user-icon-btn:focus .user-icon-svg,
+    .user-icon-btn:hover .user-icon-svg {
+      background: #e9e6fa;
+    }
+    .user-dropdown {
+      display: none;
+      position: absolute;
+      top: 2.7em;
+      right: 0;
+      min-width: 210px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(95,46,234,0.13);
+      z-index: 100;
+      padding: 1em 1.2em 0.7em 1.2em;
+      font-size: 1em;
+      color: #232526;
+      animation: fadeIn 0.2s;
+    }
+    .user-dropdown.active {
+      display: block;
+    }
+    .user-dropdown .profile-label {
+      font-weight: 700;
+      color: #5f2eea;
+      margin-bottom: 0.5em;
+      font-size: 1.1em;
+    }
+    .user-dropdown .profile-info {
+      margin-bottom: 0.7em;
+    }
+    .user-dropdown .profile-info span {
+      display: block;
+      color: #333;
+      font-size: 0.98em;
+      margin-bottom: 0.2em;
+    }
+    .user-dropdown .dropdown-logout-btn {
+      width: 100%;
+      padding: 0.7em 0;
+      background: linear-gradient(90deg, #5f2eea 0%, #ff3576 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.5em;
+      transition: background 0.2s;
+    }
+    .user-dropdown .dropdown-logout-btn:hover {
+      background: linear-gradient(90deg, #ff3576 0%, #5f2eea 100%);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 
 <body>
-  <nav>
-    <img src="/image/logo.png" alt="Logo" class="logo" style="height:40px;vertical-align:left;margin-right:500px;">
-    <a href="/logout">Logout</a>
-  </nav>
-
   <div class="dashboard-container">
     <header class="dashboard-header">
       <h1 class="dashboard-title">Manager Dashboard</h1>
-      <div class="user-info">
+      <div class="user-info" style="position:relative;">
+
         <span class="user-role">Manager View</span>
+        <!-- User Icon and Dropdown -->
+        <button class="user-icon-btn" id="userIconBtn" aria-label="User menu" type="button">
+          <svg class="user-icon-svg" viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M12 14c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4z"/>
+          </svg>
+        </button>
+        <div class="user-dropdown" id="userDropdown">
+          <div class="profile-label">Profile</div>
+          <div class="profile-info">
+            <span><strong>Username:</strong>
+              <%= user && (user.username || user.name || user.email) ? (user.username || user.name || user.email) : 'manager' %>
+            </span>
+            <% if (typeof user !== 'undefined' && user && user.email) { %>
+              <span><strong>Email:</strong> <%= user.email %></span>
+            <% } %>
+          </div>
+          <form action="/logout" method="get" style="margin:0;">
+            <button class="dropdown-logout-btn" type="submit">Logout</button>
+          </form>
+        </div>
       </div>
     </header>
 
@@ -25,69 +119,16 @@
       <aside class="dashboard-sidebar">
         <h2 class="sidebar-title">Navigation</h2>
         <ul class="sidebar-nav">
-          <li><a href="#" class="sidebar-link active">Dashboard</a></li>
-          <li><a href="/expenses" class="sidebar-link">View All Expenses</a></li>
+          <li><a href="#" class="sidebar-link active" id="dashboard-link">Dashboard</a></li>
+          <li><a href="#" class="sidebar-link" id="viewall-link">View All Expenses</a></li>
           <li><a href="#" class="sidebar-link">Reports</a></li>
           <li><a href="#" class="sidebar-link">Settings</a></li>
         </ul>
       </aside>
 
       <!-- Main Content -->
-      <main class="dashboard-main">
-        <!-- Stats Overview -->
-        <div class="stats-grid">
-          <div class="stat-card">
-            <h3 class="stat-label">Pending Approvals</h3>
-            <p class="stat-value" id="stat-pending">0</p>
-          </div>
-          <div class="stat-card">
-            <h3 class="stat-label">Total Reviewed</h3>
-            <p class="stat-value" id="stat-reviewed">0</p>
-          </div>
-          <div class="stat-card">
-            <h3 class="stat-label">Approved</h3>
-            <p class="stat-value" id="stat-approved">0</p>
-          </div>
-          <div class="stat-card">
-            <h3 class="stat-label">Rejected</h3>
-            <p class="stat-value" id="stat-rejected">0</p>
-          </div>
-        </div>
-        <!-- Pending Approvals Table -->
-        <div class="dashboard-table-container">
-          <h2 class="table-title">Pending Approvals</h2>
-          <div class="table-wrapper">
-            <table class="dashboard-table">
-              <thead>
-                <tr>
-                  <th>Employee</th>
-                  <th>Expense</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="expenses-tbody">
-                <!-- Expenses will be loaded here -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <!-- Charts Section -->
-        <div class="charts-grid">
-          <div class="chart-card">
-            <h3 class="chart-title">Expense Chart</h3>
-            <div class="chart-placeholder">
-              <canvas id="expenseChart" class="chart-image"></canvas>
-            </div>
-          </div>
-          <div class="chart-card">
-            <h3 class="chart-title">Approval Trend</h3>
-            <div class="chart-placeholder">
-              <canvas id="approvalChart" class="chart-image"></canvas>
-            </div>
-          </div>
-        </div>
+      <main class="dashboard-main" id="dashboard-main">
+        <!-- Content will be rendered by JS -->
       </main>
     </div>
   </div>
@@ -97,122 +138,252 @@
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
+    // User icon dropdown logic
+    const userIconBtn = document.getElementById('userIconBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    userIconBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      userDropdown.classList.toggle('active');
+    });
+    document.addEventListener('click', function(e) {
+      if (!userDropdown.contains(e.target) && !userIconBtn.contains(e.target)) {
+        userDropdown.classList.remove('active');
+      }
+    });
+    // Existing dashboard JS below
+    let allExpenses = [];
+    let viewAllMode = false;
+    // Utility to render the dashboard main content
+    function renderDashboard() {
+      const main = document.getElementById('dashboard-main');
+      main.innerHTML = '';
+      if (!viewAllMode) {
+        // --- DASHBOARD MODE ---
+        // Stats
+        let pending = 0, reviewed = 0, approved = 0, rejected = 0;
+        const categoryTotals = {};
+        const approvalTrend = {};
+        allExpenses.forEach(exp => {
+          if (exp.status === 'Pending') pending++;
+          if (exp.status === 'Approved') approved++;
+          if (exp.status === 'Rejected') rejected++;
+          if (exp.status !== 'Pending') reviewed++;
+          // Category totals
+          if (exp.category) {
+            categoryTotals[exp.category] = (categoryTotals[exp.category] || 0) + (exp.amount || 0);
+          }
+          // Approval trend by date
+          if (exp.date && exp.status) {
+            const dateStr = new Date(exp.date).toISOString().slice(0, 10);
+            if (!approvalTrend[dateStr]) approvalTrend[dateStr] = { Approved: 0, Pending: 0, Rejected: 0 };
+            approvalTrend[dateStr][exp.status] += 1;
+          }
+        });
+        // Stats grid
+        main.innerHTML += `
+          <div class="stats-grid">
+            <div class="stat-card">
+              <h3 class="stat-label">Pending Approvals</h3>
+              <p class="stat-value">${pending}</p>
+            </div>
+            <div class="stat-card">
+              <h3 class="stat-label">Total Reviewed</h3>
+              <p class="stat-value">${reviewed}</p>
+            </div>
+            <div class="stat-card">
+              <h3 class="stat-label">Approved</h3>
+              <p class="stat-value">${approved}</p>
+            </div>
+            <div class="stat-card">
+              <h3 class="stat-label">Rejected</h3>
+              <p class="stat-value">${rejected}</p>
+            </div>
+          </div>
+        `;
+        // Pending Approvals Table
+        main.innerHTML += `
+          <div class="dashboard-table-container">
+            <h2 class="table-title">Pending Approvals</h2>
+            <div class="table-wrapper">
+              <table class="dashboard-table">
+                <thead>
+                  <tr>
+                    <th>Employee</th>
+                    <th>Expense</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="expenses-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        `;
+        // Charts
+        main.innerHTML += `
+          <div class="charts-grid">
+            <div class="chart-card">
+              <h3 class="chart-title">Expense Chart</h3>
+              <div class="chart-placeholder">
+                <canvas id="expenseChart" class="chart-image"></canvas>
+              </div>
+            </div>
+            <div class="chart-card">
+              <h3 class="chart-title">Approval Trend</h3>
+              <div class="chart-placeholder">
+                <canvas id="approvalChart" class="chart-image"></canvas>
+              </div>
+            </div>
+          </div>
+        `;
+        // Render only pending expenses in table
+        renderExpensesTable(allExpenses.filter(exp => exp.status === 'Pending'));
+        // Render charts
+        renderCharts(categoryTotals, approvalTrend);
+      } else {
+        // --- VIEW ALL MODE ---
+        main.innerHTML += `
+          <div class="dashboard-table-container">
+            <h2 class="table-title">All Expenses</h2>
+            <div class="table-wrapper">
+              <table class="dashboard-table">
+                <thead>
+                  <tr>
+                    <th>Employee</th>
+                    <th>Expense</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="expenses-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        `;
+        // Render all expenses in table
+        renderExpensesTable(allExpenses);
+      }
+    }
+    // Render table rows
+    function renderExpensesTable(expenses) {
+      const tbody = document.getElementById('expenses-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      if (expenses.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#888;">No expenses found.</td></tr>';
+      } else {
+        expenses.forEach(exp => {
+          const statusClass = exp.status === 'Approved' ? 'status-approved' : (exp.status === 'Rejected' ? 'status-rejected' : 'status-pending');
+          const approveDisabled = exp.status !== 'Pending' ? 'disabled' : '';
+          const rejectDisabled = exp.status !== 'Pending' ? 'disabled' : '';
+          const approveLabel = exp.status === 'Approved' ? 'Approved' : 'Approve';
+          const rejectLabel = exp.status === 'Rejected' ? 'Rejected' : 'Reject';
+          tbody.innerHTML += `
+            <tr>
+              <td>${exp.userId && exp.userId.username ? exp.userId.username : 'Unknown'}</td>
+              <td>${exp.description || ''}</td>
+              <td>$${exp.amount != null ? exp.amount : ''}</td>
+              <td><span class="status-badge ${statusClass}">${exp.status || 'Pending'}</span></td>
+              <td class="action-buttons">
+                <button class="action-btn approve-btn" data-id="${exp._id}" ${approveDisabled}>${approveLabel}</button>
+                <button class="action-btn reject-btn" data-id="${exp._id}" ${rejectDisabled}>${rejectLabel}</button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+      // Button handlers
+      document.querySelectorAll('.approve-btn').forEach(btn => {
+        btn.onclick = function() {
+          const id = this.getAttribute('data-id');
+          fetch(`/expenses/${id}/approve`, { method: 'POST' })
+            .then(res => res.json())
+            .then(() => updateManagerDashboard());
+        };
+      });
+      document.querySelectorAll('.reject-btn').forEach(btn => {
+        btn.onclick = function() {
+          const id = this.getAttribute('data-id');
+          fetch(`/expenses/${id}/reject`, { method: 'POST' })
+            .then(res => res.json())
+            .then(() => updateManagerDashboard());
+        };
+      });
+    }
+    // Render charts
+    function renderCharts(categoryTotals, approvalTrend) {
+      // --- Chart.js: Expense by Category ---
+      const ctx1 = document.getElementById('expenseChart').getContext('2d');
+      if (window.expenseChartInstance) window.expenseChartInstance.destroy();
+      window.expenseChartInstance = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(categoryTotals),
+          datasets: [{
+            label: 'Total Amount',
+            data: Object.values(categoryTotals),
+            backgroundColor: 'rgba(95,46,234,0.6)'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+      // Approval Trend Line Chart
+      const dates = Object.keys(approvalTrend).sort();
+      const approvedData = dates.map(d => approvalTrend[d].Approved);
+      const pendingData = dates.map(d => approvalTrend[d].Pending);
+      const rejectedData = dates.map(d => approvalTrend[d].Rejected);
+      const ctx2 = document.getElementById('approvalChart').getContext('2d');
+      if (window.approvalChartInstance) window.approvalChartInstance.destroy();
+      window.approvalChartInstance = new Chart(ctx2, {
+        type: 'line',
+        data: {
+          labels: dates,
+          datasets: [
+            { label: 'Approved', data: approvedData, borderColor: '#28a745', backgroundColor: 'rgba(40,167,69,0.1)', fill: true },
+            { label: 'Pending', data: pendingData, borderColor: '#ffc107', backgroundColor: 'rgba(255,193,7,0.1)', fill: true },
+            { label: 'Rejected', data: rejectedData, borderColor: '#dc3545', backgroundColor: 'rgba(220,53,69,0.1)', fill: true }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: true } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+    // Fetch and update dashboard
     function updateManagerDashboard() {
       fetch('/expenses/all')
         .then(res => res.json())
         .then(expenses => {
-          // Stats
-          let pending = 0, reviewed = 0, approved = 0, rejected = 0;
-          const categoryTotals = {};
-          const approvalTrend = {};
-          expenses.forEach(exp => {
-            if (exp.status === 'Pending') pending++;
-            if (exp.status === 'Approved') approved++;
-            if (exp.status === 'Rejected') rejected++;
-            if (exp.status !== 'Pending') reviewed++;
-            // Category totals
-            if (exp.category) {
-              categoryTotals[exp.category] = (categoryTotals[exp.category] || 0) + (exp.amount || 0);
-            }
-            // Approval trend by date
-            if (exp.date && exp.status) {
-              const dateStr = new Date(exp.date).toISOString().slice(0, 10);
-              if (!approvalTrend[dateStr]) approvalTrend[dateStr] = { Approved: 0, Pending: 0, Rejected: 0 };
-              approvalTrend[dateStr][exp.status] += 1;
-            }
-          });
-          document.getElementById('stat-pending').textContent = pending;
-          document.getElementById('stat-reviewed').textContent = reviewed;
-          document.getElementById('stat-approved').textContent = approved;
-          document.getElementById('stat-rejected').textContent = rejected;
-          // Table
-          const tbody = document.getElementById('expenses-tbody');
-          tbody.innerHTML = '';
-          if (expenses.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#888;">No expenses found.</td></tr>';
-          } else {
-            expenses.forEach(exp => {
-              const statusClass = exp.status === 'Approved' ? 'status-approved' : (exp.status === 'Rejected' ? 'status-rejected' : 'status-pending');
-              const approveDisabled = exp.status !== 'Pending' ? 'disabled' : '';
-              const rejectDisabled = exp.status !== 'Pending' ? 'disabled' : '';
-              const approveLabel = exp.status === 'Approved' ? 'Approved' : 'Approve';
-              const rejectLabel = exp.status === 'Rejected' ? 'Rejected' : 'Reject';
-              tbody.innerHTML += `
-                <tr>
-                  <td>${exp.userId && exp.userId.username ? exp.userId.username : 'Unknown'}</td>
-                  <td>${exp.description || ''}</td>
-                  <td>$${exp.amount != null ? exp.amount : ''}</td>
-                  <td><span class="status-badge ${statusClass}">${exp.status || 'Pending'}</span></td>
-                  <td class="action-buttons">
-                    <button class="action-btn approve-btn" data-id="${exp._id}" ${approveDisabled}>${approveLabel}</button>
-                    <button class="action-btn reject-btn" data-id="${exp._id}" ${rejectDisabled}>${rejectLabel}</button>
-                  </td>
-                </tr>
-              `;
-            });
-          }
-          // Button handlers
-          document.querySelectorAll('.approve-btn').forEach(btn => {
-            btn.onclick = function() {
-              const id = this.getAttribute('data-id');
-              fetch(`/expenses/${id}/approve`, { method: 'POST' })
-                .then(res => res.json())
-                .then(() => updateManagerDashboard());
-            };
-          });
-          document.querySelectorAll('.reject-btn').forEach(btn => {
-            btn.onclick = function() {
-              const id = this.getAttribute('data-id');
-              fetch(`/expenses/${id}/reject`, { method: 'POST' })
-                .then(res => res.json())
-                .then(() => updateManagerDashboard());
-            };
-          });
-          // --- Chart.js: Expense by Category ---
-          const ctx1 = document.getElementById('expenseChart').getContext('2d');
-          if (window.expenseChartInstance) window.expenseChartInstance.destroy();
-          window.expenseChartInstance = new Chart(ctx1, {
-            type: 'bar',
-            data: {
-              labels: Object.keys(categoryTotals),
-              datasets: [{
-                label: 'Total Amount',
-                data: Object.values(categoryTotals),
-                backgroundColor: 'rgba(95,46,234,0.6)'
-              }]
-            },
-            options: {
-              responsive: true,
-              plugins: { legend: { display: false } },
-              scales: { y: { beginAtZero: true } }
-            }
-          });
-          // Approval Trend Line Chart
-          const dates = Object.keys(approvalTrend).sort();
-          const approvedData = dates.map(d => approvalTrend[d].Approved);
-          const pendingData = dates.map(d => approvalTrend[d].Pending);
-          const rejectedData = dates.map(d => approvalTrend[d].Rejected);
-          const ctx2 = document.getElementById('approvalChart').getContext('2d');
-          if (window.approvalChartInstance) window.approvalChartInstance.destroy();
-          window.approvalChartInstance = new Chart(ctx2, {
-            type: 'line',
-            data: {
-              labels: dates,
-              datasets: [
-                { label: 'Approved', data: approvedData, borderColor: '#28a745', backgroundColor: 'rgba(40,167,69,0.1)', fill: true },
-                { label: 'Pending', data: pendingData, borderColor: '#ffc107', backgroundColor: 'rgba(255,193,7,0.1)', fill: true },
-                { label: 'Rejected', data: rejectedData, borderColor: '#dc3545', backgroundColor: 'rgba(220,53,69,0.1)', fill: true }
-              ]
-            },
-            options: {
-              responsive: true,
-              plugins: { legend: { display: true } },
-              scales: { y: { beginAtZero: true } }
-            }
-          });
+          allExpenses = expenses;
+          renderDashboard();
         });
     }
-    updateManagerDashboard();
+    // Sidebar navigation handlers
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('dashboard-link').onclick = function(e) {
+        e.preventDefault();
+        viewAllMode = false;
+        document.getElementById('dashboard-link').classList.add('active');
+        document.getElementById('viewall-link').classList.remove('active');
+        renderDashboard();
+      };
+      document.getElementById('viewall-link').onclick = function(e) {
+        e.preventDefault();
+        viewAllMode = true;
+        document.getElementById('dashboard-link').classList.remove('active');
+        document.getElementById('viewall-link').classList.add('active');
+        renderDashboard();
+      };
+      updateManagerDashboard();
+    });
   </script>
 </body>
 

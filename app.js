@@ -115,17 +115,11 @@ app.post('/register', async (req, res) => {
 });
 
 app.get('/manager/dashboard', (req, res) => {
-  if (!req.session.userId || req.session.accountType !== 'manager') {
-    return res.redirect('/login');
-  }
-  res.render('manager_dashboard');
+  res.render('manager_dashboard', { user: req.user }); // or whatever your user object is
 });
 
 app.get('/employee/dashboard', (req, res) => {
-  if (!req.session.userId || req.session.accountType !== 'employee') {
-    return res.redirect('/login');
-  }
-  res.render('employee_dashboard');
+  res.render('employee_dashboard', { user: req.user });
 });
 
 app.use('/api/employee', employeeRoutes);

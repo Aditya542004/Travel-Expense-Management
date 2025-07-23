@@ -3,22 +3,111 @@
 <head>
   <title>Employee Dashboard</title>
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .user-icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.2em 0.5em;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+    .user-icon-svg {
+      width: 2.1em;
+      height: 2.1em;
+      fill: #5f2eea;
+      border-radius: 50%;
+      background: #f4f7fb;
+      box-shadow: 0 2px 8px rgba(95,46,234,0.08);
+      transition: background 0.2s;
+    }
+    .user-icon-btn:focus .user-icon-svg,
+    .user-icon-btn:hover .user-icon-svg {
+      background: #e9e6fa;
+    }
+    .user-dropdown {
+      display: none;
+      position: absolute;
+      top: 2.7em;
+      right: 0;
+      min-width: 210px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(95,46,234,0.13);
+      z-index: 100;
+      padding: 1em 1.2em 0.7em 1.2em;
+      font-size: 1em;
+      color: #232526;
+      animation: fadeIn 0.2s;
+    }
+    .user-dropdown.active {
+      display: block;
+    }
+    .user-dropdown .profile-label {
+      font-weight: 700;
+      color: #5f2eea;
+      margin-bottom: 0.5em;
+      font-size: 1.1em;
+    }
+    .user-dropdown .profile-info {
+      margin-bottom: 0.7em;
+    }
+    .user-dropdown .profile-info span {
+      display: block;
+      color: #333;
+      font-size: 0.98em;
+      margin-bottom: 0.2em;
+    }
+    .user-dropdown .dropdown-logout-btn {
+      width: 100%;
+      padding: 0.7em 0;
+      background: linear-gradient(90deg, #5f2eea 0%, #ff3576 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.5em;
+      transition: background 0.2s;
+    }
+    .user-dropdown .dropdown-logout-btn:hover {
+      background: linear-gradient(90deg, #ff3576 0%, #5f2eea 100%);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
-  <nav>
-    <img src="/image/logo.png" alt="Logo" class="logo" style="height:40px;vertical-align:left;margin-right:500px;">
-    <a href="/logout">Logout</a>
-  </nav>
-
   <div class="dashboard-container">
-    <!-- Header -->
     <header class="dashboard-header">
       <h1 class="dashboard-title">Employee Dashboard</h1>
-      <div class="user-info">
+      <div class="user-info" style="position:relative;">
         <span class="user-role">Employee View</span>
+        <!-- User Icon and Dropdown -->
+        <button class="user-icon-btn" id="userIconBtn" aria-label="User menu" type="button">
+          <svg class="user-icon-svg" viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M12 14c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4z"/>
+          </svg>
+        </button>
+        <div class="user-dropdown" id="userDropdown">
+          <div class="profile-label">Profile</div>
+          <div class="profile-info">
+            <span><strong>Username:</strong> <%= user && (user.username || user.name || user.email) ? (user.username || user.name || user.email) : 'employee' %></span>
+            <% if (user && user.email) { %>
+              <span><strong>Email:</strong> <%= user.email %></span>
+            <% } %>
+          </div>
+          <form action="/logout" method="get" style="margin:0;">
+            <button class="dropdown-logout-btn" type="submit">Logout</button>
+          </form>
+        </div>
       </div>
     </header>
-
     <div class="dashboard-layout">
       <!-- Sidebar Navigation -->
       <aside class="dashboard-sidebar">
@@ -30,7 +119,6 @@
           <li><a href="#" class="sidebar-link">Settings</a></li>
         </ul>
       </aside>
-
       <!-- Main Content -->
       <main class="dashboard-main">
         <!-- Stats Overview -->
@@ -52,7 +140,6 @@
             <p class="stat-value" id="stat-rejected">0</p>
           </div>
         </div>
-
         <!-- Recent Expenses Table -->
         <div class="dashboard-table-container">
           <h2 class="table-title">Recent Expenses</h2>
@@ -73,7 +160,6 @@
             </table>
           </div>
         </div>
-
         <!-- Charts Section -->
         <div class="charts-grid">
           <div class="chart-card">
@@ -92,12 +178,23 @@
       </main>
     </div>
   </div>
-
   <footer class="dashboard-footer">
     <p>&copy; 2025 Travel Expense Management System</p>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
+    // User icon dropdown logic
+    const userIconBtn = document.getElementById('userIconBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    userIconBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      userDropdown.classList.toggle('active');
+    });
+    document.addEventListener('click', function(e) {
+      if (!userDropdown.contains(e.target) && !userIconBtn.contains(e.target)) {
+        userDropdown.classList.remove('active');
+      }
+    });
     // Fetch and update stats
     fetch('/api/employee/stats')
       .then(res => res.json())

@@ -6,14 +6,16 @@
 </head>
 <body>
   <nav>
-    <img src="/image/logo.png" alt="Logo" class="logo">
-    <div class="nav-links">
-      <% if (!userId) { %>
-        <a href="/login">Login</a>
-        <a href="/register">Register</a>
-      <% } else { %>
-        <a href="/logout">Logout</a>
-      <% } %>
+    <div class="nav-container">
+      <img src="/image/logo.png" alt="Logo" class="logo">
+      <div class="nav-links">
+        <% if (!userId) { %>
+          <a href="/login">Login</a>
+          <a href="/register">Register</a>
+        <% } else { %>
+          <a href="/logout">Logout</a>
+        <% } %>
+      </div>
     </div>
   </nav>
 
