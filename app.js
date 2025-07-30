@@ -114,11 +114,30 @@ app.post('/register', async (req, res) => {
   }
 });
 
-app.get('/manager/dashboard', (req, res) => {
-  res.render('manager_dashboard', { user: req.user }); // or whatever your user object is
+// Authentication middleware
+const requireAuth = async (req, res, next) => {
+  if (!req.session.userId) {
+    return res.redirect('/login');
+  }
+  try {
+    const user = await User.findById(req.session.userId);
+    if (!user) {
+      req.session.destroy();
+      return res.redirect('/login');
+    }
+    req.user = user;
+    next();
+  } catch (err) {
+    console.error('Auth middleware error:', err);
+    return res.redirect('/login');
+  }
+};
+
+app.get('/manager/dashboard', requireAuth, (req, res) => {
+  res.render('manager_dashboard', { user: req.user });
 });
 
-app.get('/employee/dashboard', (req, res) => {
+app.get('/employee/dashboard', requireAuth, (req, res) => {
   res.render('employee_dashboard', { user: req.user });
 });
 

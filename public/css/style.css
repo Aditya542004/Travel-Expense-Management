@@ -1329,3 +1329,134 @@ label[for="accountType"] {
   display: block;
   letter-spacing: 0.5px;
 }
+
+/* --- User Dropdown Improvements --- */
+.user-dropdown {
+  display: none;
+  position: absolute;
+  top: 3.2em;
+  right: 0;
+  min-width: 240px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(95, 46, 234, 0.15);
+  z-index: 100;
+  padding: 1.5em 1.8em 1.2em 1.8em;
+  font-size: 1em;
+  color: #232526;
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(95, 46, 234, 0.08);
+}
+
+.user-dropdown.active {
+  display: block;
+}
+
+.user-dropdown .profile-label {
+  font-weight: 800;
+  color: #5f2eea;
+  margin-bottom: 1rem;
+  font-size: 1.2em;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-bottom: 2px solid #f4f7fb;
+  padding-bottom: 0.8rem;
+}
+
+.user-dropdown .profile-info {
+  margin-bottom: 1.2rem;
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #ececec;
+}
+
+.user-dropdown .profile-info span {
+  display: block;
+  color: #333;
+  font-size: 1rem;
+  margin-bottom: 0.8rem;
+  line-height: 1.4;
+}
+
+.user-dropdown .profile-info span:last-child {
+  margin-bottom: 0;
+}
+
+.user-dropdown .profile-info strong {
+  color: #5f2eea;
+  font-weight: 700;
+  margin-right: 0.5rem;
+}
+
+.user-dropdown .dropdown-logout-btn {
+  width: 100%;
+  padding: 0.9em 0;
+  background: linear-gradient(135deg, #ff3576 0%, #5f2eea 100%);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1em;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 0.8rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(255, 53, 118, 0.2);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.user-dropdown .dropdown-logout-btn:hover {
+  background: linear-gradient(135deg, #e02e68 0%, #4a1fd8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 53, 118, 0.3);
+}
+
+.user-dropdown .dropdown-logout-btn:active {
+  transform: translateY(0);
+}
+
+@keyframes slideDown {
+  0% { 
+    opacity: 0; 
+    transform: translateY(-15px) scale(0.95);
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Improve user icon button */
+.user-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.3em 0.6em;
+  display: flex;
+  align-items: center;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.user-icon-btn:hover {
+  transform: scale(1.05);
+}
+
+.user-icon-svg {
+  width: 2.3em;
+  height: 2.3em;
+  fill: #5f2eea;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f4f7fb 0%, #e9e6fa 100%);
+  box-shadow: 0 4px 12px rgba(95, 46, 234, 0.15);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.user-icon-btn:focus .user-icon-svg,
+.user-icon-btn:hover .user-icon-svg {
+  background: linear-gradient(135deg, #e9e6fa 0%, #d4d1f7 100%);
+  box-shadow: 0 6px 16px rgba(95, 46, 234, 0.2);
+  border-color: rgba(95, 46, 234, 0.2);
+}
